@@ -14,17 +14,15 @@ RUN sed -i /etc/apt/sources.list -e 's/$/ non-free'/ && \
     apt-get update && apt-get -y upgrade && \
     rm /etc/apt/preferences.d/no-debian-php && \
     apt-get install -y libcurl4-gnutls-dev libgmp-dev libmcrypt-dev libfreetype6-dev libjpeg-dev libpng-dev libldap2-dev libsnmp-dev snmp-mibs-downloader iputils-ping && \
-    rm -rf /var/lib/apt/lists/*
-
+    rm -rf /var/lib/apt/lists/* && \
 # Install required packages and files required for snmp
-RUN mkdir -p /var/lib/mibs/ietf && \
+    mkdir -p /var/lib/mibs/ietf && \
     curl -s ftp://ftp.cisco.com/pub/mibs/v2/CISCO-SMI.my -o /var/lib/mibs/ietf/CISCO-SMI.txt && \
     curl -s ftp://ftp.cisco.com/pub/mibs/v2/CISCO-TC.my -o /var/lib/mibs/ietf/CISCO-TC.txt && \
     curl -s ftp://ftp.cisco.com/pub/mibs/v2/CISCO-VTP-MIB.my -o /var/lib/mibs/ietf/CISCO-VTP-MIB.txt && \
-    curl -s ftp://ftp.cisco.com/pub/mibs/v2/MPLS-VPN-MIB.my -o /var/lib/mibs/ietf/MPLS-VPN-MIB.txt
-
+    curl -s ftp://ftp.cisco.com/pub/mibs/v2/MPLS-VPN-MIB.my -o /var/lib/mibs/ietf/MPLS-VPN-MIB.txt && \
 # Configure apache and required PHP modules
-RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
+    docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
     docker-php-ext-install mysqli && \
     docker-php-ext-configure gd --enable-gd-native-ttf --with-freetype-dir=/usr/include/freetype2 --with-png-dir=/usr/include --with-jpeg-dir=/usr/include && \
     docker-php-ext-install gd && \
@@ -58,8 +56,8 @@ RUN tar -xzf /tmp/v${PHPSAML_VERSION}.tar.gz -C ${WEB_REPO}/functions/php-saml/ 
 
 # Use system environment variables into config.php
 ENV PHPIPAM_BASE /
-RUN cp ${WEB_REPO}/config.dist.php ${WEB_REPO}/config.php && \
-    chown www-data /var/www/html/app/admin/import-export/upload && \
+COPY config.php ${WEB_REPO}/config.php
+RUN chown www-data /var/www/html/app/admin/import-export/upload && \
     chown www-data /var/www/html/app/subnets/import-subnet/upload && \
     chown www-data /var/www/html/css/images/logo && \
     echo "\$db['webhost'] = '%';" >> ${WEB_REPO}/config.php && \
